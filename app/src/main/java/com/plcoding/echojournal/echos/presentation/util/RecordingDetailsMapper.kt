@@ -10,13 +10,14 @@ fun RecordingDetails.toCreateEchoRoute(): NavigationRoutes.CreateEcho{
             "Recording path can't be null"
         ),
         duration = this.duration.inWholeMilliseconds,
-        amplitudes = this.amplitudes.joinToString()
+        amplitudes = this.amplitudes.joinToString(separator = ";")
     )
 }
 
 fun NavigationRoutes.CreateEcho.toRecordingDetails(): RecordingDetails{
     return RecordingDetails(
         duration = this.duration.milliseconds,
-        amplitudes = this.amplitudes.split(";").map{it.toFloat()}
+        amplitudes = this.amplitudes.split(";").map{it.toFloat()},
+        filePath = this.recordingPath
     )
 }

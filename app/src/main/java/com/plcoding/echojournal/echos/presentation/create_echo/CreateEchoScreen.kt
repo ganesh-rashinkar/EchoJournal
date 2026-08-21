@@ -1,6 +1,7 @@
 
 package com.plcoding.echojournal.echos.presentation.create_echo
 
+import android.widget.Toast
 import androidx.activity.compose.BackHandler
 import androidx.compose.foundation.Image
 import androidx.compose.foundation.clickable
@@ -40,6 +41,7 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.focus.FocusRequester
 import androidx.compose.ui.graphics.vector.ImageVector
 import androidx.compose.ui.layout.ContentScale
+import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.platform.LocalFocusManager
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.res.vectorResource
@@ -54,6 +56,7 @@ import com.plcoding.echojournal.core.presentation.designsystem.text_fields.Trans
 import com.plcoding.echojournal.core.presentation.designsystem.theme.EchoJournalTheme
 import com.plcoding.echojournal.core.presentation.designsystem.theme.secondary70
 import com.plcoding.echojournal.core.presentation.designsystem.theme.secondary95
+import com.plcoding.echojournal.core.presentation.util.ObserveAsEvents
 import com.plcoding.echojournal.echos.presentation.components.EchoMoodPlayer
 import com.plcoding.echojournal.echos.presentation.create_echo.components.EchoTopicsRow
 import com.plcoding.echojournal.echos.presentation.create_echo.components.SelectMoodSheet
@@ -67,6 +70,15 @@ fun CreateEchoRoot(
 ) {
     val state by viewModel.state.collectAsStateWithLifecycle()
 
+    val context = LocalContext.current
+    ObserveAsEvents(viewModel.events) {
+        event ->
+        when(event){
+            CreateEchoEvent.FailedToSaveFile -> {
+                Toast.makeText(context, context.getString(R.string.error_couldnt_save_file), Toast.LENGTH_LONG).show()
+            }
+        }
+    }
     CreateEchoScreen(
         state = state,
         onAction = viewModel::onAction,
@@ -247,7 +259,8 @@ fun CreateEchoScreen(
                 )
             }
             Row(
-                modifier = Modifier.fillMaxWidth()
+                modifier = Modifier
+                    .fillMaxWidth()
                     .height(IntrinsicSize.Min),
                 horizontalArrangement = Arrangement.spacedBy(16.dp),
                 verticalAlignment = Alignment.CenterVertically
