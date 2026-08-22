@@ -79,7 +79,7 @@ class AndroidVoiceRecorder(
                     amplitudes.add(amplitude)
                 }
 
-                delay(10L)
+                delay(10L.milliseconds)
             }
         }
     }
@@ -88,8 +88,8 @@ class AndroidVoiceRecorder(
         return if(isRecording){
             try {
                 val maxAmplitude = recorder?.maxAmplitude
-                val maxAmplitudeRatio = maxAmplitude?.takeIf {it>0f }?.run{
-                    ((this/MAX_AMPLITUDE_VALUE).toFloat()).coerceIn(0f,1f)
+                val maxAmplitudeRatio = maxAmplitude?.takeIf { it > 0f }?.run{
+                   ((this/MAX_AMPLITUDE_VALUE.toFloat())).coerceIn(0f,1f)
                 }
                 maxAmplitudeRatio?:0f
             }
@@ -104,7 +104,7 @@ class AndroidVoiceRecorder(
         durationJob = applicationScope.launch {
             var lastTime= System.currentTimeMillis()
             while (isRecording && !isPaused){
-                delay(100)
+                delay(100.milliseconds)
                 val currentTime = System.currentTimeMillis()
                 val elapsedTime= currentTime - lastTime
                 _recordingDetails.update {

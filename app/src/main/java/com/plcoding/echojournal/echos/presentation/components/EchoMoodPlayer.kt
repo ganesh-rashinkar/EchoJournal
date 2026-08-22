@@ -15,6 +15,8 @@ import androidx.compose.runtime.Composable
 import androidx.compose.runtime.remember
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.layout.onSizeChanged
+import androidx.compose.ui.platform.LocalDensity
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.Dp
 import androidx.compose.ui.unit.dp
@@ -70,6 +72,7 @@ fun EchoMoodPlayer(
         color = backgroundColor,
         modifier = modifier
     ) {
+        val density = LocalDensity.current
         Row(
             modifier = Modifier
                 .height(IntrinsicSize.Min),
@@ -97,6 +100,19 @@ fun EchoMoodPlayer(
                         horizontal = 8.dp
                         )
                     .fillMaxHeight()
+                    .onSizeChanged{
+                        onTrackSizeAvailable(
+                        TrackSizeInfo(
+                            trackWidth = it.width.toFloat(),
+                            barWidth = with(density){
+                                amplitudeBarWidth.toPx()
+                            },
+                            spacing = with(density){
+                                amplitudeBarSpacing.toPx()
+                            }
+                        )
+                        )
+                    }
             )
             Text(
                 formattedDurationText,

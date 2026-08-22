@@ -17,7 +17,7 @@ data class CreateEchoState(
     val searchResults: List<Selectable<String>> = emptyList(),
     val showCreateTopicOption:Boolean = true,
     val canSaveEcho:Boolean=false,
-    val playbackAmplitudes: List<Float> = List(32){0.3f},
+    val playbackAmplitudes: List<Float> = emptyList(),
     val playbackTotalDuration: Duration = Duration.ZERO,
     val playbackState: PlaybackState = PlaybackState.STOPPED,
     val durationPlayed : Duration = Duration.ZERO,

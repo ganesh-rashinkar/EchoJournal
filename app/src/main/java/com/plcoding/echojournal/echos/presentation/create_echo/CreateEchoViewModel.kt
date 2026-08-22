@@ -1,6 +1,5 @@
 package com.plcoding.echojournal.echos.presentation.create_echo
 
-import android.util.Log
 import androidx.lifecycle.SavedStateHandle
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
@@ -8,7 +7,9 @@ import androidx.navigation.toRoute
 import com.plcoding.echojournal.app.navigation.NavigationRoutes
 import com.plcoding.echojournal.core.presentation.designsystem.dropdowns.Selectable.Companion.asUnselectedItems
 import com.plcoding.echojournal.echos.domain.recording.RecordingStorage
+import com.plcoding.echojournal.echos.presentation.echos.models.TrackSizeInfo
 import com.plcoding.echojournal.echos.presentation.models.MoodUi
+import com.plcoding.echojournal.echos.presentation.util.AmplitudeNormalizer
 import com.plcoding.echojournal.echos.presentation.util.toRecordingDetails
 import kotlinx.coroutines.FlowPreview
 import kotlinx.coroutines.channels.Channel
@@ -24,6 +25,7 @@ import kotlinx.coroutines.flow.receiveAsFlow
 import kotlinx.coroutines.flow.stateIn
 import kotlinx.coroutines.flow.update
 import kotlinx.coroutines.launch
+import kotlin.time.Duration.Companion.milliseconds
 
 class CreateEchoViewModel(
     private val savedStateHandle: SavedStateHandle,
@@ -65,12 +67,28 @@ class CreateEchoViewModel(
             CreateEchoAction.OnSaveClick -> onSaveClick()
             is CreateEchoAction.OnTitleTextChange -> onTitleTextChange(action.text)
             is CreateEchoAction.OnTopicClick -> onTopicClick(action.topic)
-            is CreateEchoAction.OnTrackSizeAvailable -> {}
+            is CreateEchoAction.OnTrackSizeAvailable -> onTrackSizeAvailable(action.trackSizeInfo)
             CreateEchoAction.OnSelectMoodClick -> onSelectMoodClick()
             CreateEchoAction.OnDismissConfirmLeaveDialog -> onDismissConfirmLeaveMessage()
             CreateEchoAction.OnCancelClick,
             CreateEchoAction.OnNavigateBackClick,
             CreateEchoAction.OnGoBack -> onConfirmLeaveDialog()
+        }
+    }
+
+    private fun onTrackSizeAvailable(trackSizeInfo: TrackSizeInfo) {
+        viewModelScope.launch {
+            val finalAmplitudes = AmplitudeNormalizer.normalize(
+                sourceAmplitudes = recordingDetails.amplitudes,
+                trackWidth = trackSizeInfo.trackWidth,
+                barWidth = trackSizeInfo.barWidth,
+                spacing = trackSizeInfo.spacing
+            )
+            _state.update {
+                it.copy(
+                    playbackAmplitudes = finalAmplitudes
+                )
+            }
         }
     }
 
@@ -83,7 +101,6 @@ class CreateEchoViewModel(
     }
 
     private fun onSaveClick() {
-        Log.e("TAG","file path: ${recordingDetails.filePath}")
         if(recordingDetails.filePath == null){
             return
         }
@@ -122,7 +139,7 @@ class CreateEchoViewModel(
                 it.addTopicText
             }
             .distinctUntilChanged()
-            .debounce (300)
+            .debounce (300.milliseconds)
             .onEach { query ->
                 _state.update {
                     it.copy(

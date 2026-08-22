@@ -26,8 +26,8 @@ fun EchoPlayBar(
     amplitudeBarSpacing: Dp,
     powerRatios: List<Float>,
     trackColor: Color,
-    trackFillColor:Color,
-    playerProgress:()-> Float,
+    trackFillColor: Color,
+    playerProgress: () -> Float,
     modifier: Modifier = Modifier
 ) {
     Canvas(modifier = modifier) {
@@ -83,14 +83,14 @@ private fun EchoPlayBarPreview() {
             Random.nextFloat()
         }
         EchoPlayBar(
-            amplitudeBarSpacing = 2.dp,
             amplitudeBarWidth = 4.dp,
+            amplitudeBarSpacing = 2.dp,
             powerRatios = ratios,
             trackColor = MoodUi.SAD.colorSet.desaturated,
             trackFillColor = MoodUi.SAD.colorSet.vivid,
             playerProgress = { 0.2f },
             modifier = Modifier.fillMaxWidth()
-                .height(50.dp)
+                .height(50.dp),
         )
     }
 }
