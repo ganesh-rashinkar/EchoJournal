@@ -20,7 +20,6 @@ import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.SharingStarted
 import kotlinx.coroutines.flow.debounce
 import kotlinx.coroutines.flow.distinctUntilChanged
-import kotlinx.coroutines.flow.filterNot
 import kotlinx.coroutines.flow.filterNotNull
 import kotlinx.coroutines.flow.launchIn
 import kotlinx.coroutines.flow.map
@@ -30,7 +29,6 @@ import kotlinx.coroutines.flow.receiveAsFlow
 import kotlinx.coroutines.flow.stateIn
 import kotlinx.coroutines.flow.update
 import kotlinx.coroutines.launch
-import timber.log.Timber
 import kotlin.time.Duration
 import kotlin.time.Duration.Companion.milliseconds
 
@@ -47,8 +45,17 @@ class CreateEchoViewModel(
     private val eventChannel = Channel<CreateEchoEvent>()
     val events = eventChannel.receiveAsFlow()
 
+    private val restoredTopics = savedStateHandle.get<String>("topics")?.split(",")
     private val _state = MutableStateFlow(CreateEchoState(
-        playbackTotalDuration = recordingDetails.duration
+        playbackTotalDuration = recordingDetails.duration,
+        titleText = savedStateHandle["titleText"]?:"",
+        noteText = savedStateHandle["noteText"]?:"",
+        topics = restoredTopics?:emptyList(),
+        mood = savedStateHandle.get<String>("mood")?.let {
+            MoodUi.valueOf(it)
+        },
+        showMoodSelector = savedStateHandle.get<String>("mood") == null,
+        canSaveEcho = savedStateHandle.get<Boolean>("canSaveEcho") == true
     ))
     val state = _state
         .onStart {
@@ -56,6 +63,14 @@ class CreateEchoViewModel(
                 observeAddTopicText()
                 hasLoadedInitialData = true
             }
+        }
+        .onEach {
+            state ->
+            savedStateHandle["titleText"] = state.titleText
+            savedStateHandle["noteText"] = state.noteText
+            savedStateHandle["topics"] = state.topics.joinToString(",")
+            savedStateHandle["mood"] = state.mood?.name
+            savedStateHandle["canSaveEcho"] = state.canSaveEcho
         }
         .stateIn(
             scope = viewModelScope,
@@ -73,7 +88,7 @@ class CreateEchoViewModel(
             CreateEchoAction.OnDismissMoodSelector -> onDismissMoodSelector()
             CreateEchoAction.OnDismissTopicSuggestions -> onDismissTopicSuggestions()
             is CreateEchoAction.OnMoodClick ->  onMoodClick(action.moodUi)
-            is CreateEchoAction.OnNoteTextChange -> {}
+            is CreateEchoAction.OnNoteTextChange -> onNoteTextChange(action.text)
             CreateEchoAction.OnPauseAudioClick -> audioPlayer.pause()
             CreateEchoAction.OnPlayAudioClick -> onPlayAudioClick()
             is CreateEchoAction.OnRemoveTopicClick -> onRemoveTopicClick(action.topic)
@@ -86,6 +101,14 @@ class CreateEchoViewModel(
             CreateEchoAction.OnCancelClick,
             CreateEchoAction.OnNavigateBackClick,
             CreateEchoAction.OnGoBack -> onConfirmLeaveDialog()
+        }
+    }
+
+    private fun onNoteTextChange(text: String) {
+        _state.update {
+            it.copy(
+                noteText = text
+            )
         }
     }
 
@@ -145,7 +168,8 @@ class CreateEchoViewModel(
     private fun onTitleTextChange(text: String) {
         _state.update {
             it.copy(
-                titleText = text
+                titleText = text,
+                canSaveEcho = text.isNotBlank() && it.mood != null
             )
         }
     }
