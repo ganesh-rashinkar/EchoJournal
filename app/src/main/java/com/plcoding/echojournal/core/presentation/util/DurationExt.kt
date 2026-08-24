@@ -10,7 +10,7 @@ fun Duration.formatMMSS(): String{
      val seconds = totalSeconds % 60
      return String.format(
          locale = Locale.getDefault(),
-         "%2d:%2d",
+         "%02d:%02d",
          minutes,
          seconds
      )

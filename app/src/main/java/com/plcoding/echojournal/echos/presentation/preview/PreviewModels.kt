@@ -18,6 +18,7 @@ data object PreviewModels{
         amplitudes = (1..30).map { Random.nextFloat() },
         playbackTotalDuration = 250.seconds,
         playbackCurrentDuration = 120.seconds,
-        playbackState = PlaybackState.PAUSED
+        playbackState = PlaybackState.PAUSED,
+        audioFilePath = ""
     )
 }

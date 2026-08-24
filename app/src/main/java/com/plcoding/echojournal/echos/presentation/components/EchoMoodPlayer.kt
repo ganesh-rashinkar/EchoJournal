@@ -117,7 +117,10 @@ fun EchoMoodPlayer(
             Text(
                 formattedDurationText,
                 color = MaterialTheme.colorScheme.onSurfaceVariant,
-                modifier = Modifier.padding(8.dp)
+                modifier = Modifier.padding(8.dp),
+                style = MaterialTheme.typography.bodySmall.copy(
+                    fontFeatureSettings = "tnum"
+                )
             )
         }
     }
@@ -131,11 +134,11 @@ private fun EchoMoodPlayerPreview() {
             Random.nextFloat()
         }
         EchoMoodPlayer(
-            moodUi = MoodUi.EXCITED,
+            moodUi = MoodUi.NEUTRAL,
             playerProgress = {0.3f},
             playbackState = PlaybackState.PLAYING,
-            durationPlayed = 120.seconds,
-            totalPlaybackDuration = 250.seconds,
+            durationPlayed = 1.seconds,
+            totalPlaybackDuration = 5.seconds,
             powerRatios = ratios,
             onPlayClick = {},
             onPauseClick = {},
