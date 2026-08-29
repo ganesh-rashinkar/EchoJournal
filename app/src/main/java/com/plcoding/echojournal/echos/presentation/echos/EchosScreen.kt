@@ -37,7 +37,6 @@ import com.plcoding.echojournal.echos.presentation.echos.components.EchosTopBar
 import com.plcoding.echojournal.echos.presentation.echos.models.AudioCaptureMethod
 import com.plcoding.echojournal.echos.presentation.echos.models.RecordingState
 import org.koin.androidx.compose.koinViewModel
-import timber.log.Timber
 
 @Composable
 fun EchosRoot(
@@ -169,7 +168,7 @@ fun EchosScreen(
                            onAction(EchosAction.OnPlayEchoClick(it))
                        },
                        onPauseClick = {
-                           onAction(EchosAction.OnPauseRecordingClick)
+                           onAction(EchosAction.OnPauseAudioClick)
                        },
                        onTrackSizeAvailable = { trackSize ->
                            onAction(EchosAction.OnTrackSizeAvailable(trackSize))

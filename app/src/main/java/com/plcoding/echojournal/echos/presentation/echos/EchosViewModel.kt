@@ -6,6 +6,7 @@ import com.plcoding.echojournal.R
 import com.plcoding.echojournal.core.presentation.designsystem.dropdowns.Selectable
 import com.plcoding.echojournal.core.presentation.util.UiText
 import com.plcoding.echojournal.echos.domain.audio.AudioPlayer
+import com.plcoding.echojournal.echos.domain.echo.Echo
 import com.plcoding.echojournal.echos.domain.echo.EchoDataSource
 import com.plcoding.echojournal.echos.domain.recording.VoiceRecorder
 import com.plcoding.echojournal.echos.presentation.echos.models.AudioCaptureMethod
@@ -72,8 +73,9 @@ class EchosViewModel(
             started = SharingStarted.WhileSubscribed(5_000L),
             initialValue = EchosState()
         )
-    private val echos = echoDataSource
+    private val filteredEchos = echoDataSource
         .observeEchos()
+        .filterByMoodAndTopics()
         .onEach {
             echos ->
             _state.update {
@@ -160,7 +162,9 @@ class EchosViewModel(
                toggleTopicFilter(action.topic)
             }
 
-            EchosAction.OnPauseAudioClick -> {}
+            EchosAction.OnPauseAudioClick -> {
+                audioPlayer.pause()
+            }
             is EchosAction.OnPlayEchoClick -> onPlayEchoClick(action.echoId)
             is EchosAction.OnTrackSizeAvailable -> {
                 audioTrackSizeInfo.update {
@@ -179,7 +183,7 @@ class EchosViewModel(
     }
     private fun observeEchos(){
         combine(
-            echos,
+            filteredEchos,
             playingEchoId,
             audioPlayer.activeTrack
         ){
@@ -352,17 +356,18 @@ class EchosViewModel(
 
     private fun observeFilters(){
         combine(
+            echoDataSource.observeTopics(),
             selectedTopicFilters,
             selectedMoodFilters
         ){
-            selectedTopics,selectedMods->
+            allTopics,selectedTopics,selectedMods->
             _state.update {
                 it.copy(
-                    topics = it.topics.map {
-                        selectableTopic->
+                    topics = allTopics.map {
+                        topic->
                         Selectable(
-                            item = selectableTopic.item,
-                            selected = selectedTopics.contains(selectableTopic.item)
+                            item = topic,
+                            selected = selectedTopics.contains(topic)
                         )
                     },
                     moods = MoodUi.values().map {
@@ -424,7 +429,29 @@ class EchosViewModel(
             }
         }
     }
-    fun Flow<List<EchoUi>>.groupByRelativeDate(): Flow<Map<UiText, List<EchoUi>>> {
+
+    private fun Flow<List<Echo>>.filterByMoodAndTopics(): Flow<List<Echo>>{
+        return combine(
+            this,
+            selectedMoodFilters,
+            selectedTopicFilters
+        ){
+            echos,moodFilters, topicFilters ->
+            echos.filter {
+                echo->
+                val matchesMoodFilter = moodFilters
+                    .takeIf { it.isNotEmpty() }
+                    ?.any{it.name == echo.mood.name}
+                    ?:true
+                val matchesTopicFilter = topicFilters
+                    .takeIf { it.isNotEmpty() }
+                    ?.any{ it in echo.topics}
+                    ?:true
+                matchesMoodFilter && matchesTopicFilter
+            }
+        }
+    }
+    private fun Flow<List<EchoUi>>.groupByRelativeDate(): Flow<Map<UiText, List<EchoUi>>> {
         val formatter = DateTimeFormatter.ofPattern("dd MMM")
         val today = LocalDate.now()
         return map {
