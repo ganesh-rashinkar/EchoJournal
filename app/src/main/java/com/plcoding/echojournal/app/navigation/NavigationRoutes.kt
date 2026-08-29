@@ -13,4 +13,7 @@ sealed interface NavigationRoutes {
         val duration:Long,
         val amplitudes:String
     ): NavigationRoutes
+
+    @Serializable
+    data object Settings
 }
