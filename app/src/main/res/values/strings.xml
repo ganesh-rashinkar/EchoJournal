@@ -56,4 +56,6 @@
     <string name="discard_recording">Discard Recording</string>
     <string name="this_cannot_be_undone">This can\'t be undone.</string>
     <string name="error_couldnt_save_file">OOps, saving the file failed.</string>
+    <string name="today">Today</string>
+    <string name="yesterday">Yesterday</string>
 </resources>
