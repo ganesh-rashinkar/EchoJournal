@@ -14,7 +14,6 @@ import androidx.compose.material3.IconButton
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Scaffold
 import androidx.compose.material3.Text
-import androidx.compose.material3.TopAppBarColors
 import androidx.compose.material3.TopAppBarDefaults
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.getValue
@@ -25,10 +24,10 @@ import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
-import androidx.lifecycle.viewmodel.compose.viewModel
 import com.plcoding.echojournal.R
 import com.plcoding.echojournal.core.presentation.designsystem.theme.EchoJournalTheme
 import com.plcoding.echojournal.core.presentation.designsystem.theme.bgGradient
+import com.plcoding.echojournal.echos.presentation.settings.components.MoodCard
 import org.koin.androidx.compose.koinViewModel
 
 @Composable
@@ -94,12 +93,15 @@ fun SettingsScreen(
                 .padding(16.dp),
             verticalArrangement = Arrangement.spacedBy(16.dp)
         ) {
-
+            MoodCard(
+                selectedMood = state.selectedMood,
+                onSelectMood = {onAction(SettingsAction.OnMoodClick(it))}
+                )
         }
     }
 }
 
-//@Preview
+@Preview
 @Composable
 private fun Preview() {
     EchoJournalTheme {
